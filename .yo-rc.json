@@ -1,0 +1,7 @@
+{
+  "generator-phaser": {
+    "projectName": "mr-far-far-east-driller",
+    "esVersion": 6,
+    "gameFolder": "boilerplate"
+  }
+}
