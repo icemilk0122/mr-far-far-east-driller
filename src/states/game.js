@@ -59,23 +59,23 @@ class Game extends Phaser.State {
 
   move(drill) {
     if (this.input.keyboard.isDown(this.controls['p'+drill.id][0]) && drill.x > this.blockWidth/2) {
-        for(var i = 0; i<this.drillArr.length;i++)
-        {
-          if(i!=drill.id && (Math.abs(drill.x-this.drillArr[i].x) <= this.blockWidth)&&(drill.y == this.drillArr[i].y))
-          {
-            return;
-          }
-        }
+        // for(var i = 0; i<this.drillArr.length;i++)
+        // {
+        //   if(i!=drill.id && (Math.abs(drill.x-this.drillArr[i].x) <= this.blockWidth)&&(drill.y == this.drillArr[i].y))
+        //   {
+        //     return;
+        //   }
+        // }
         this.game.add.tween(drill).to({ x: drill.x - this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('left');
     } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][1]) && drill.x < this.game.width - this.blockWidth/2) {
-        for(var j = 0; j<this.drillArr.length;j++)
-        {
-          if(j!=drill.id && (Math.abs(drill.x-this.drillArr[j].x) <= this.blockWidth )&&(drill.y == this.drillArr[j].y))
-          {
-            return;
-          }
-        }
+        // for(var j = 0; j<this.drillArr.length;j++)
+        // {
+        //   if(j!=drill.id && (Math.abs(drill.x-this.drillArr[j].x) <= this.blockWidth )&&(drill.y == this.drillArr[j].y))
+        //   {
+        //     return;
+        //   }
+        // }
         this.game.add.tween(drill).to({ x: drill.x + this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('right');
     } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][2])) {
@@ -179,8 +179,8 @@ class Game extends Phaser.State {
   };
 
   render() {
-    this.game.debug.body(this.drillArr[0]);
-    this.game.debug.body(this.drillArr[1]);
+    // this.game.debug.body(this.drillArr[0]);
+    // this.game.debug.body(this.drillArr[1]);
     //this.game.debug.bodyInfo(this.drillArr[0]);
   }
 }
