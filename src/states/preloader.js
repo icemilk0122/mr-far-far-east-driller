@@ -25,6 +25,7 @@ class Preloader extends Phaser.State {
   loadResources() {
       // load your resources here
       this.game.load.spritesheet('ground', 'assets/sprites/ground.png', 64, 64);
+      this.game.load.spritesheet('lava', 'assets/sprites/lava.png', 64, 64);
       this.game.load.spritesheet('drill0', 'assets/sprites/drill.png', 64, 64);
       this.game.load.spritesheet('drill1', 'assets/sprites/drill2.png', 64, 64);
   }

@@ -1,3 +1,5 @@
+import Lava from '../prefabs/lava';
+
 class Game extends Phaser.State {
 
   constructor() {
@@ -13,6 +15,7 @@ class Game extends Phaser.State {
   }
 
   create() {
+    this.game.camera.reset();
     this.game.input.keyboard.addKey([
         Phaser.Keyboard.LEFT,
         Phaser.Keyboard.RIGHT,
@@ -24,7 +27,6 @@ class Game extends Phaser.State {
         Phaser.Keyboard.W,
         Phaser.Keyboard.S,
     ]);
-    this.game.world.setBounds(0,0,this.game.width);
     // Create ground
     this.createGround();
     // Create driller
@@ -33,12 +35,11 @@ class Game extends Phaser.State {
 
   update() {
     this.game.physics.arcade.collide(this.drillArr[0],this.drillArr[1]);
-    this.game.physics.arcade.collide(this.drillArr, this.ground);
+    this.game.physics.arcade.collide(this.drillArr, this.game.ground);
 
     for(var i=0;i<this.drillArr.length;i++)
     {
       // Move
-      this.drillArr[i].body.velocity.x = 0;
       if (!this.game.tweens.isTweening(this.drillArr[i])) {
         this.move(this.drillArr[i]);
       }
@@ -46,6 +47,18 @@ class Game extends Phaser.State {
       if (this.drillArr[i].alive) {
         this.drillmove(this.drillArr[i]);
       }
+      // Lava kills
+      this.game.lava.forEachAlive(function(lava) {
+          if (!lava.lethal) return;
+
+          if (this.game.math.distance(this.drillArr[i].x, this.drillArr[i].y, lava.x, lava.y) < this.blockWidth/2) {
+              this.drillArr[i].kill();
+              if(this.game.driller.countLiving()==0)
+              {
+                this.game.state.start('gameover');
+              }
+          }
+      }, this);
     }
   }
 
@@ -59,42 +72,32 @@ class Game extends Phaser.State {
 
   move(drill) {
     if (this.input.keyboard.isDown(this.controls['p'+drill.id][0]) && drill.x > this.blockWidth/2) {
-        // for(var i = 0; i<this.drillArr.length;i++)
-        // {
-        //   if(i!=drill.id && (Math.abs(drill.x-this.drillArr[i].x) <= this.blockWidth)&&(drill.y == this.drillArr[i].y))
-        //   {
-        //     return;
-        //   }
-        // }
         this.game.add.tween(drill).to({ x: drill.x - this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('left');
     } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][1]) && drill.x < this.game.width - this.blockWidth/2) {
-        // for(var j = 0; j<this.drillArr.length;j++)
-        // {
-        //   if(j!=drill.id && (Math.abs(drill.x-this.drillArr[j].x) <= this.blockWidth )&&(drill.y == this.drillArr[j].y))
-        //   {
-        //     return;
-        //   }
-        // }
         this.game.add.tween(drill).to({ x: drill.x + this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('right');
     } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][2])) {
         this.game.add.tween(drill).to({ y: drill.y + this.blockHeight }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         this.addMoreGround();
-       //  if (drill.y >= this.game.camera.y + this.middle) {
-       //      this.game.add.tween(this.game.camera).to({ y: this.game.camera.y + this.blockHeight }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
-       //  }
         drill.animations.play('down');
         this.depth++;
+        this.game.driller.forEachAlive(function(driller){
+          if(driller != this.game.camera.target && driller.y > this.game.camera.target.y)
+          {
+            this.game.camera.follow(driller);
+          }
+        }, this)
     }
   }
 
   drillmove(drill) {
-    this.ground.forEachAlive(function(ground) {
+    this.game.ground.forEachAlive(function(ground) {
         if (this.game.math.distance(drill.x, drill.y, ground.x, ground.y) < this.blockWidth*0.8) {
             if (!ground.animations.getAnimation('crush').isPlaying) {
                 ground.tween = this.game.add.tween(ground).to({ alpha: 0 }, 180, Phaser.Easing.Cubic.In, true);
                 ground.animations.play('crush');
+                this.game.global['player'+(drill.id+1)+'Score'] += 1;
             }
         }
 
@@ -105,61 +108,67 @@ class Game extends Phaser.State {
   }
 
   createDriller() {
+    this.game.driller = this.game.add.group();
     for(var i=0;i<this.game.global.drillLen;i++)
     {
       // Create drill
-      var drill;
-      drill = this.game.add.sprite(this.blockWidth * 1.5*(i*2+1), this.middle, 'drill'+i);
-      drill.id = i;
-      drill.anchor.setTo(0.5, 0.5);
-      drill.animations.add('right', [0,1,2], 10, true);
-      drill.animations.add('left', [3,4,5], 10, true);
-      drill.animations.add('down', [6,7,8], 10, true);
-      drill.animations.add('up', [9,10,11], 10, true);
-      drill.animations.play('right');
+      var drill = this.game.driller.getFirstDead();
+      if (drill === null) {
+        drill = this.game.add.sprite(this.blockWidth * 1.5*(i*2+1), this.middle, 'drill'+i, 0, this.game.driller);
+        drill.id = i;
+        drill.anchor.setTo(0.5, 0.5);
+        drill.animations.add('right', [0,1,2], 10, true);
+        drill.animations.add('left', [3,4,5], 10, true);
+        drill.animations.add('down', [6,7,8], 10, true);
+        drill.animations.add('up', [9,10,11], 10, true);
+        drill.animations.play('right');
+      }
+      drill.reset(this.blockWidth * 1.5*(i*2+1), this.middle);
+      drill.frame = 0;
+      drill.alpha = 1;
+      drill.revive();
       this.game.physics.arcade.enable(drill);
-      //drill.body.bounce.x=1;
-      //drill.body.bounce.y=1;
-      //drill.body.collideWorldBounds = true;
-      //drill.body.onCollide = new Phaser.Signal();
-      //drill.body.onCollide.add(this.hitDrill, this);
       this.drillArr.push(drill);
     }
-    this.game.camera.follow(this.drillArr[0]);
+    this.game.camera.follow(this.game.driller.getFirstAlive());
   }
 
   createGround() {
     this.groundDepth = this.middle + this.blockHeight;
-    this.ground = this.game.add.group();
+    this.game.ground = this.game.add.group();
+    this.game.lava = this.game.add.group();
+    this.game.firsttime = true;
     this.addMoreGround();
   };
 
-  addMoreGround() {
-      //if (this.game.camera.y + this.game.camera.height < G.groundDepth - G.blockHeight) return;
+  createLava(game, x, y) {
+    var lava = this.game.lava.getFirstDead();
+    if (lava === null) {
+      lava = this.game.lava.add(new Lava(game, x, y));
+    }else {
+      lava.reset(x, y);
+      lava.lethal = false;
+      lava.revive();
+      lava.animations.stop();
+      lava.animations.play('filling');
+    }
+  };
 
+  addMoreGround() {
       var x, y;
-      var firsttime = true;
-      var addlevel=(firsttime)?10:5;
-      firsttime = false;
+      var addlevel=(this.game.firsttime)?10:1;
+      this.game.firsttime = false;
       for(x = this.blockWidth * 0.5; x < this.game.width; x += this.blockWidth) {
           for(y = this.groundDepth; y < this.groundDepth + this.blockHeight*addlevel ; y += this.blockHeight) {
-              // var difficulty = 50 * this.game.camera.y/(this.game.world.height * 0.8);
-              // var obstacleChance = this.game.math.chanceRoll(10 + difficulty);
-              // if (obstacleChance && y > G.groundDepth) {
-              //     // Randomly place obstacles based on depth
-              //     var lavaChance = this.game.math.chanceRoll(50);
-              //     if (lavaChance) {
-              //         // Place lava
-              //         Lava.create(this.game, x, y);
-              //     } else {
-              //         // Place monster
-              //         Monster.create(this.game, x, y);
-              //     }
-              //} else {
+              var difficulty = 0;//this.game.camera.y/100;
+              var obstacleChance = Phaser.Utils.chanceRoll(10 + difficulty);
+              if (obstacleChance && y >= Math.max(this.groundDepth,this.middle + this.blockHeight*2)) {
+                  this.createLava(this.game, x, y);
+              } else {
                   // Place ground
-                  var ground = this.ground.getFirstDead();
+                  var ground = this.game.ground.getFirstDead();
                   if (ground === null) {
-                      ground = this.game.add.sprite(x, y, 'ground', 0, this.ground);
+                      ground = this.game.add.sprite(x, y, 'ground', 0, this.game.ground);
                       ground.anchor.setTo(0.5, 0.5);
                       var animation = ground.animations.add('crush', [0,1,2,3], 20, false);
                       animation.killOnComplete = true;
@@ -171,7 +180,7 @@ class Game extends Phaser.State {
                   this.game.physics.arcade.enable(ground);
                   ground.body.allowGravity = false;
                   ground.body.immovable = true;
-              //}
+              }
           }
       }
 
@@ -179,8 +188,13 @@ class Game extends Phaser.State {
   };
 
   render() {
-    // this.game.debug.body(this.drillArr[0]);
-    // this.game.debug.body(this.drillArr[1]);
+    this.game.debug.text(this.game.time.fps || '--', 2, 14, "#00ff00");
+    this.game.debug.text('lava living:'+this.game.lava.countLiving(), 2,28);
+    this.game.debug.text('ground living:'+this.game.ground.countLiving(), 2,42);
+    this.game.debug.text(this.game.global.player1Score, 2, 56);
+    this.game.debug.text(this.game.global.player2Score, 2, 70);
+    //this.game.debug.body(this.drillArr[0]);
+    //this.game.debug.body(this.drillArr[1]);
     //this.game.debug.bodyInfo(this.drillArr[0]);
   }
 }
