@@ -31,6 +31,21 @@ class Boot extends Phaser.State {
 
     this.initGlobalVariables();
 
+    //setairconsole
+    this.game.air_console = new AirConsole();
+    var activeplayers = 0;
+    this.game.air_console.onConnect = function(device_id) {
+      if (activeplayers == 0) {
+        if (this.game.air_console.getControllerDeviceIds().length >= 2) {
+          // Enough controller devices connected to start the game.
+          // Setting the first 2 controllers to active players.
+          this.game.air_console.setActivePlayers(2);
+          activeplayers = this.game.air_console.getActivePlayerDeviceIds().length;
+          //console.log(this.game.air_console.getActivePlayerDeviceIds())
+        }
+      }
+    }
+
     this.game.state.start('preloader');
   }
 
