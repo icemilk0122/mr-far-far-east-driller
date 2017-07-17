@@ -43,8 +43,7 @@
               },
 
               preload: function () {
-
-                  this.load.atlas('generic', 'assets/virtualjoystick/skins/generic-joystick.png', 'assets/virtualjoystick/skins/generic-joystick.json');
+                  this.load.atlas('dpad', 'assets/virtualjoystick/skins/dpad.png', 'assets/virtualjoystick/skins/dpad.json');
                   // this.load.image('ship', 'assets/virtualjoystick/thrust.png');
                   // this.load.image('bg', 'assets/virtualjoystick/sky2.png');
 
@@ -53,7 +52,6 @@
               create: function () {
 
                   //this.add.image(0, 0, 'bg');
-
                   // this.sprite = this.add.sprite(400, 350, 'ship');
                   // this.sprite.texture.baseTexture.scaleMode = PIXI.NEAREST;
                   // this.sprite.scale.set(2);
@@ -63,10 +61,10 @@
 
                   this.pad = this.game.plugins.add(Phaser.VirtualJoystick);
 
-                  this.stick = this.pad.addStick(0, 0, 200, 'generic');
+                  this.stick = this.pad.addDPad(0, 0, 200, 'dpad');
                   this.stick.alignBottomLeft(20);
 
-                  this.buttonA = this.pad.addButton(500, 520, 'generic', 'button1-up', 'button1-down');
+                  this.buttonA = this.pad.addButton(500, 520, 'dpad', 'button1-up', 'button1-down');
                   this.buttonA.alignBottomRight(20);
                   this.buttonA.onDown.add(this.pressButtonA, this);
               },
@@ -76,18 +74,31 @@
 
               },
               update: function () {
-
                   var maxSpeed = 400;
 
                   if (this.stick.isDown)
                   {
-                      sendMessge('down');
+                    if (this.stick.direction === Phaser.LEFT)
+                    {
+                        sendMessge('left');
+                    }
+                    else if (this.stick.direction === Phaser.RIGHT)
+                    {
+                        sendMessge('right');
+                    }
+                    else if (this.stick.direction === Phaser.UP)
+                    {
+                        sendMessge('up');
+                    }
+                    else if (this.stick.direction === Phaser.DOWN)
+                    {
+                        sendMessge('down');
+                    }
                   }
                   else
                   {
-                      //this.sprite.body.velocity.x = 0;
+                      sendMessge('stop');
                   }
-
               }
 
           };

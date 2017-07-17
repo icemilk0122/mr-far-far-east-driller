@@ -13,28 +13,26 @@ class Menu extends Phaser.State {
       font: '42px Arial', fill: '#ffffff', align: 'center'
     });
     text.anchor.set(0.5);
-
-    this.input.onDown.add(this.startGame, this);
-
-    // Listen for messages from other devices
+    //this.input.onDown.add(this.startGame, this);
+    var _menu = this;
+    //Listen for messages from other devices
     this.game.air_console.onMessage = function(from, data) {
-        if(this.game.air_console.convertDeviceIdToPlayerNumber(from) == 0)
+        if(_menu.game.air_console.convertDeviceIdToPlayerNumber(from) == 0)
         {
           switch(data){
             case 'A':
-              startGame();
+              _menu.startGame();
               break;
           }
         }
     };
   }
 
-  update() {}
-
   startGame () {
     this.game.state.start('game');
   }
 
+  update() {}
 }
 
 export default Menu;

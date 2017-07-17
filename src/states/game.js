@@ -16,21 +16,26 @@ class Game extends Phaser.State {
 
   create() {
     this.game.camera.reset();
-    this.game.input.keyboard.addKey([
-        Phaser.Keyboard.LEFT,
-        Phaser.Keyboard.RIGHT,
-        Phaser.Keyboard.UP,
-        Phaser.Keyboard.DOWN,
-        Phaser.Keyboard.SPACEBAR,
-        Phaser.Keyboard.A,
-        Phaser.Keyboard.D,
-        Phaser.Keyboard.W,
-        Phaser.Keyboard.S,
-    ]);
     // Create ground
     this.createGround();
     // Create driller
     this.createDriller();
+
+    this.game.p0action = 'stop';
+    this.game.p1action = 'stop';
+    var _game = this;
+    //Listen for messages from other devices
+    this.game.air_console.onMessage = function(from, data) {
+        //console.log(data);
+        switch(data){
+          case 'down':
+            _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'down';
+            break;
+          case 'stop':
+            _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'stop';
+            break;
+        }
+    };
   }
 
   update() {
@@ -71,13 +76,14 @@ class Game extends Phaser.State {
   }
 
   move(drill) {
-    if (this.input.keyboard.isDown(this.controls['p'+drill.id][0]) && drill.x > this.blockWidth/2) {
+    if ((this.game['p'+drill.id+'action']=='left') && drill.x > this.blockWidth/2) {
         this.game.add.tween(drill).to({ x: drill.x - this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('left');
-    } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][1]) && drill.x < this.game.width - this.blockWidth/2) {
+    } else if ((this.game['p'+drill.id+'action'].action=='right') && drill.x < this.game.width - this.blockWidth/2) {
         this.game.add.tween(drill).to({ x: drill.x + this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('right');
-    } else if (this.input.keyboard.isDown(this.controls['p'+drill.id][2])) {
+    } else if (this.game['p'+drill.id+'action'].action=='down') {
+        console.log('move: down');
         this.game.add.tween(drill).to({ y: drill.y + this.blockHeight }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         this.addMoreGround();
         drill.animations.play('down');
