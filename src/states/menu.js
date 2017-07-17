@@ -13,7 +13,6 @@ class Menu extends Phaser.State {
       font: '42px Arial', fill: '#ffffff', align: 'center'
     });
     text.anchor.set(0.5);
-    //this.input.onDown.add(this.startGame, this);
     var _menu = this;
     //Listen for messages from other devices
     this.game.air_console.onMessage = function(from, data) {

@@ -26,7 +26,18 @@ class Menu extends Phaser.State {
 
     this.saveVarsToLocalStorage();
 
-    this.input.onDown.add(this.restartGame, this);
+    var _gameover = this;
+    //Listen for messages from other devices
+    this.game.air_console.onMessage = function(from, data) {
+        if(_gameover.game.air_console.convertDeviceIdToPlayerNumber(from) == 0)
+        {
+          switch(data){
+            case 'A':
+              _gameover.restartGame();
+              break;
+          }
+        }
+    };
   }
 
   saveVarsToLocalStorage(){

@@ -26,8 +26,14 @@ class Game extends Phaser.State {
     var _game = this;
     //Listen for messages from other devices
     this.game.air_console.onMessage = function(from, data) {
-        //console.log(data);
+        console.log(data);
         switch(data){
+          case 'left':
+            _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'left';
+            break;
+          case 'right':
+            _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'right';
+            break;
           case 'down':
             _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'down';
             break;
@@ -79,11 +85,10 @@ class Game extends Phaser.State {
     if ((this.game['p'+drill.id+'action']=='left') && drill.x > this.blockWidth/2) {
         this.game.add.tween(drill).to({ x: drill.x - this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('left');
-    } else if ((this.game['p'+drill.id+'action'].action=='right') && drill.x < this.game.width - this.blockWidth/2) {
+    } else if ((this.game['p'+drill.id+'action']=='right') && drill.x < this.game.width - this.blockWidth/2) {
         this.game.add.tween(drill).to({ x: drill.x + this.blockWidth }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         drill.animations.play('right');
-    } else if (this.game['p'+drill.id+'action'].action=='down') {
-        console.log('move: down');
+    } else if (this.game['p'+drill.id+'action']=='down') {
         this.game.add.tween(drill).to({ y: drill.y + this.blockHeight }, this.drillMoveSpeed, Phaser.Easing.Sinusoidal.InOut, true);
         this.addMoreGround();
         drill.animations.play('down');
