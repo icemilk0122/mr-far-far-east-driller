@@ -37,7 +37,7 @@ class Boot extends Phaser.State {
     var activeplayers = 0;
     this.game.air_console.onConnect = function(device_id) {
       if (activeplayers == 0) {
-        if (game.air_console.getControllerDeviceIds().length >= 1) {
+        if (game.air_console.getControllerDeviceIds().length >= 2) {
           // Enough controller devices connected to start the game.
           // Setting the first 2 controllers to active players.
           game.air_console.setActivePlayers(2);

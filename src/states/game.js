@@ -26,7 +26,6 @@ class Game extends Phaser.State {
     var _game = this;
     //Listen for messages from other devices
     this.game.air_console.onMessage = function(from, data) {
-        console.log(data);
         switch(data){
           case 'left':
             _game.game['p'+_game.game.air_console.convertDeviceIdToPlayerNumber(from)+'action'] = 'left';
