@@ -158,7 +158,7 @@ class Game extends Phaser.State {
       var x, y;
       var addlevel=(this.game.firsttime)?10:1;
       this.game.firsttime = false;
-      for(x = this.blockWidth * 0.5; x < this.game.width; x += this.blockWidth) {
+      for(x = this.blockWidth * 0.5; x < this.game.width+this.blockWidth; x += this.blockWidth) {
           for(y = this.groundDepth; y < this.groundDepth + this.blockHeight*addlevel ; y += this.blockHeight) {
               var difficulty = 0;//this.game.camera.y/100;
               var obstacleChance = Phaser.Utils.chanceRoll(10 + difficulty);
@@ -193,8 +193,8 @@ class Game extends Phaser.State {
     this.game.debug.text('ground living:'+this.game.ground.countLiving(), 2,42);
     this.game.debug.text(this.game.global.player1Score, 2, 56);
     this.game.debug.text(this.game.global.player2Score, 2, 70);
-    //this.game.debug.body(this.drillArr[0]);
-    //this.game.debug.body(this.drillArr[1]);
+    this.game.debug.body(this.drillArr[0]);
+    this.game.debug.body(this.drillArr[1]);
     //this.game.debug.bodyInfo(this.drillArr[0]);
   }
 }

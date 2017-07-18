@@ -10,9 +10,12 @@ class Boot extends Phaser.State {
 
   create() {
     this.game.input.maxPointers = 1;
+    this.game.time.advancedTiming = true;
+
+    //setup physics system
     this.game.physics.startSystem(Phaser.Physics.ARCADE);
     this.game.physics.arcade.gravity.y = 1000;
-    this.game.time.advancedTiming = true;
+
 
     //setup device scaling
     if (this.game.device.desktop) {
